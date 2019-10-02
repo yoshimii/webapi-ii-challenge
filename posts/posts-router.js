@@ -52,6 +52,8 @@ router.get('/', (req, res) => {
     Posts.find().then(post => {
         res.json(post)
         console.log(post)
+    }).catch(err => {
+        err.status(500).json({ message: 'The posts\' information could not be retrieved' })
     })
 })
 
@@ -63,6 +65,8 @@ router.get('/:id', (req, res) => {
     Posts.findById(id).then(post => {
         res.status(200).json(post)
         console.log(post)
+    }).catch(err => {
+        res.status(500).json({ message: 'The posts information could not be retrieved' })
     })
 })
 
@@ -71,8 +75,16 @@ router.get('/:id', (req, res) => {
 router.get('/:id/comments', (req, res) => {
     const PostId = req.params.id;
     Posts.findPostComments(PostId).then(comments => {
-        res.status(200).json(comments)
-        console.log(comments)
+        if(comments.length == 0) {
+            console.log(req, res)
+
+            res.status(404).json({ message: 'The post with the specified ID does not exist' })
+        } else{
+            console.log(req, res)
+            res.status(200).json(comments)
+            console.log(comments)
+        }
+
     })
 })
 
@@ -93,7 +105,12 @@ router.put('/:id', (req, res) => {
     const body = req.body;
 
     Posts.update(id, body).then(post => {
-        res.status(200).json(body)
+        if(!body.title) {
+            res.status(404).json({ message: 'The post with the specified ID does not exist' })
+        } else {
+            res.status(200).json(body)
+        }
+        
     })
 })
 
