@@ -4,7 +4,9 @@ const Posts = require('./db.js');
 
 const router = express.Router();
 
-router.post('/', (req, res) => {//Post 1 to /api/posts
+//Posts new post to list of posts. Posts posts in posts.
+
+router.post('/', (req, res) => {
     const postData = req.body;
 
     if(!postData.title || !postData.contents) {
@@ -23,20 +25,23 @@ router.post('/', (req, res) => {//Post 1 to /api/posts
 
 //Posts comment to post of specified ID
 
-router.post('/:id/comments', (req, res) => {//Post 2 to /api/posts/:id
+router.post('/:id/comments', (req, res) => {
     const commentData = req.body;
     const id = req.params.id;
+        if(!commentData.text) {
+            console.log(req)
+            res.status(404).json({ message: 'The post with the specified ID does not exist' })            
+        } else {
+            console.log(commentData)
+            Posts.insertComment(commentData)
+            .then(post => {
+                res.status(201).json(post);
+            })
+            .catch(err => {
+                res.status(500).json({ message: 'Error adding post' })
+            })
+        }
 
-    // if(!commentData.post_ID) {
-    //     res.status(404).json({ message: 'The post with the specified ID does not exist' })
-    // } else {
-        Posts.insertComment(commentData)
-        .then(post => {
-            res.status(201).json(post);
-        })
-        .catch(err => {
-            res.status(500).json({ message: 'Error adding post' })
-        })
     })
 
 // })
@@ -68,6 +73,27 @@ router.get('/:id/comments', (req, res) => {
     Posts.findPostComments(PostId).then(comments => {
         res.status(200).json(comments)
         console.log(comments)
+    })
+})
+
+//Deletes post by id
+
+router.delete('/:id', (req, res) =>{
+    const id = req.params.id;
+
+    Posts.remove(id).then(post => {
+        res.status(204).json(req.body)
+    })
+})
+
+// Updates a post by id
+
+router.put('/:id', (req, res) => {
+    const id = req.params.id;
+    const body = req.body;
+
+    Posts.update(id, body).then(post => {
+        res.status(200).json(body)
     })
 })
 
