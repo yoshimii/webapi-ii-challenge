@@ -32,11 +32,12 @@ router.post('/:id/comments', (req, res) => {
             console.log(req)
             res.status(404).json({ message: 'The post with the specified ID does not exist' })            
         } else {
-            console.log(commentData)
+
             Posts.insertComment(commentData)
+
             .then(post => {
                 res.status(201).json(post);
-            })
+            })            
             .catch(err => {
                 res.status(500).json({ message: 'Error adding post' })
             })
@@ -44,15 +45,16 @@ router.post('/:id/comments', (req, res) => {
 
     })
 
-// })
 
 //Get all posts
 
 router.get('/', (req, res) => {
+
     Posts.find().then(post => {
+
         res.json(post)
-        console.log(post)
     }).catch(err => {
+
         err.status(500).json({ message: 'The posts\' information could not be retrieved' })
     })
 })
@@ -64,7 +66,6 @@ router.get('/:id', (req, res) => {
 
     Posts.findById(id).then(post => {
         res.status(200).json(post)
-        console.log(post)
     }).catch(err => {
         res.status(500).json({ message: 'The posts information could not be retrieved' })
     })
@@ -76,15 +77,15 @@ router.get('/:id/comments', (req, res) => {
     const PostId = req.params.id;
     Posts.findPostComments(PostId).then(comments => {
         if(comments.length == 0) {
-            console.log(req, res)
 
             res.status(404).json({ message: 'The post with the specified ID does not exist' })
-        } else{
-            console.log(req, res)
+        } else{            
             res.status(200).json(comments)
-            console.log(comments)
+            
         }
 
+    }).catch(err => {
+        res.status(500).json({ message: 'The comments information could not be retrieved' })
     })
 })
 
@@ -94,7 +95,15 @@ router.delete('/:id', (req, res) =>{
     const id = req.params.id;
 
     Posts.remove(id).then(post => {
-        res.status(204).json(req.body)
+        if(post == 0) {
+
+            res.status(404).json({ message: 'The post with the specified ID could not be found' })
+        } else {
+            res.status(204).json(post)
+        }
+
+    }).catch(err => {
+        err.status(500).json({ message: 'The post could not be removed' })
     })
 })
 
@@ -106,11 +115,14 @@ router.put('/:id', (req, res) => {
 
     Posts.update(id, body).then(post => {
         if(!body.title) {
+
             res.status(404).json({ message: 'The post with the specified ID does not exist' })
         } else {
             res.status(200).json(body)
         }
         
+    }).catch(err => {
+        err.status(500).json({ message: 'The post could not be updated' })
     })
 })
 
